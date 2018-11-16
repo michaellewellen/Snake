@@ -18,6 +18,7 @@ void DrawRectangle(float x1, float y1, float x2, float y2, std::string texture, 
 void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
 void DrawCircle(float centerX, float centerY, float radius, int segments = 24);
 
+void loadGame();
 void saveGame();
 void SetColor(int r, int g, int b, int a = 255);
 void Reset();
