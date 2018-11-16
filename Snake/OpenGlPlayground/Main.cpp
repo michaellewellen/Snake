@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <ctime>
+#include <fstream>
 #include <Windows.h>
 
 using namespace std;
@@ -14,6 +15,7 @@ const int gridWidth = 60;
 const int INITIAL_SIZE = 5;
 const double PGenerateFruit = .01;
 
+ofstream snakeFile;
 bool bw = false;
 int headX = 25;
 int headY = 25;
@@ -52,14 +54,15 @@ void DrawElement(double i, double j, char element) {
 		DrawCircle(x+r*.15, y+r*.9, r*.4, 10);
 		break;
 	case 'W':
-		glColor3f(0.0, 0.0, 0.0);
-		DrawRectangle(i, j, i + 1, j + 1);
+		glColor3f(0.0,0.0,0.0);
+		DrawRectangle(x-r, y-r, x +r, y+r);
+		break;
 	case 'B':
 		glColor3f(0.0, 0.0, 0.0);
 		DrawCircle(x, y, r, 10);
 		glColor3f(.5, .5, 0);
 		DrawCircle(x + r * .15, y + r * .9, r*.4, 10);
-
+		break;
 	case ' ':
 		break;
 	default:
@@ -100,12 +103,24 @@ void update() {
 	if (headY >= gridHeight) headY = 0;
 
 	//Move the snake's tail..
-	if (grow <= 0) {
+	if (grow == 0) {
 		int tailX = snakeX.back();
 		int tailY = snakeY.back();
 		snakeX.pop_back();
 		snakeY.pop_back();
 		board[tailX][tailY] = ' ';
+	}
+	else if (grow < 0)
+	{
+		for (int i = 0; i < 2; i++) {
+			int tailX = snakeX.back();
+			int tailY = snakeY.back();
+			snakeX.pop_back();
+			snakeY.pop_back();
+			board[tailX][tailY] = ' ';
+		}
+
+		grow += 1;
 	}
 	else {
 		grow--;
@@ -115,12 +130,15 @@ void update() {
 	{
 		case 'A': grow += 4; break;
 		case 'G': grow += 8; break;
-		case 'B': {if (grow <= 4)
-		{
-			gameOver = true; break;
-		}
-		
-				  else { grow -= 4; }
+		case 'B': {
+			if (snakeX.size() <= 4)
+			{
+				gameOver = true; break;
+			}
+		    else
+			{
+				grow -= 4; break;
+			}
 		}
 		case 'W':case 'S': case 's': gameOver = true; break;
 	}
@@ -139,17 +157,18 @@ void draw() {
 			DrawElement(i, j, board[i][j]);
 		}
 	}
-	Sleep(100);
+	Sleep(50);
 	if (!gameOver)
 		update();
 }
 
 void keyboard(int key) {
 	switch (key) {
-		case 'w': if (direction == 'E' || direction == 'W') direction = 'N'; break;
-		case 'a': if (direction == 'N' || direction == 'S')	direction = 'W'; break;
-		case 's': if (direction == 'E' || direction == 'W')	direction = 'S'; break;
-		case 'd': if (direction == 'N' || direction == 'S') direction = 'E'; break;
+		case 'w': if (direction == 'E' || direction == 'W' || direction == 'P') direction = 'N'; break;
+		case 'a': if (direction == 'N' || direction == 'S' || direction == 'P')	direction = 'W'; break;
+		case 's': if (direction == 'E' || direction == 'W' || direction == 'P')	direction = 'S'; break;
+		case 'd': if (direction == 'N' || direction == 'S' || direction == 'P') direction = 'E'; break;
+		case 'n': saveGame();
 		case 'p': if (direction = 'P');
 		case ' ': 
 			if (gameOver) {
@@ -168,6 +187,23 @@ void keyboard(int key) {
 			break;
 	}
 }
+
+void saveGame()
+{
+	string fileName;
+	cin >> ("What name would you like to save the file under?", fileName);
+	snakeFile.open(fileName);
+	for (int i = 0; i < gridWidth; i++) {
+		for (int j = 0; j < gridHeight; j++) {
+			snakeFile << board[i][j];
+		}
+	}
+	snakeFile.close();
+	return;
+	
+}
+
+
 
 int main(int argc, char** argv) {
 	srand(time(0));

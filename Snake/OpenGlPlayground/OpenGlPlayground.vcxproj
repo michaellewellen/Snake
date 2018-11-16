@@ -115,6 +115,7 @@
     <ClCompile Include="OpenGL.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Main.h" />
     <ClInclude Include="OpenGL.h" />
   </ItemGroup>
   <ItemGroup>
