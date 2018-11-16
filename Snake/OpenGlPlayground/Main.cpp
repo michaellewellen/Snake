@@ -51,6 +51,15 @@ void DrawElement(double i, double j, char element) {
 		glColor3f(0, 1.0, 0);
 		DrawCircle(x+r*.15, y+r*.9, r*.4, 10);
 		break;
+	case 'W':
+		glColor3f(0.0, 0.0, 0.0);
+		DrawRectangle(i, j, i + 1, j + 1);
+	case 'B':
+		glColor3f(0.0, 0.0, 0.0);
+		DrawCircle(x, y, r, 10);
+		glColor3f(.5, .5, 0);
+		DrawCircle(x + r * .15, y + r * .9, r*.4, 10);
+
 	case ' ':
 		break;
 	default:
@@ -60,16 +69,23 @@ void DrawElement(double i, double j, char element) {
 
 void update() {
 	bw = !bw;
+	if (direction == 'P')
+		return;
 	//Generate Fruit...
 	if (rand() / (double)RAND_MAX < PGenerateFruit) {
 		int x = rand() % gridWidth;
 		int y = rand() % gridHeight;
-		int type = rand() % 10;
-		if (type <= 1 && board[x][y] != 'S' && board[x][y] != 's')
+		int type = rand() % 25;
+		if (type <= 5 && board[x][y] != 'S' && board[x][y] != 's')
 			board[x][y] = 'G';
-		else if(board[x][y] != 'S' && board[x][y] != 's') 
+		else if (type > 5 && type <= 10 && board[x][y] != 'S' && board[x][y] != 's')
+			board[x][y] = 'B';
+		else if (board[x][y] != 'S' && board[x][y] != 's')
 			board[x][y] = 'A';
-		
+	}
+	//Generate Walls..
+	for (int i = 20; i < 40; i++) {
+		board[20][i] = 'W';
 	}
 	//Find out where the head will be...
 	switch (direction) {
@@ -99,6 +115,13 @@ void update() {
 	{
 		case 'A': grow += 4; break;
 		case 'G': grow += 8; break;
+		case 'B': {if (grow <= 4)
+		{
+			gameOver = true; break;
+		}
+		
+				  else { grow -= 4; }
+		}
 		case 'W':case 'S': case 's': gameOver = true; break;
 	}
 
