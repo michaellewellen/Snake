@@ -15,7 +15,7 @@ const int gridWidth = 60;
 const int INITIAL_SIZE = 5;
 const double PGenerateFruit = .01;
 
-
+bool pause = false;
 bool bw = false;
 int headX = 25;
 int headY = 25;
@@ -29,11 +29,14 @@ list<int> snakeY;
 list<int> snake2X;
 list<int> snake2Y;
 
+
+
 char board[gridWidth][gridHeight];
 char direction = 'E';
+char direction2 = 'W';
 bool gameOver = true;
-char board2[gridWidth][gridHeight];
-char direction2 = 'E';
+
+
 
 
 void DrawElement(double i, double j, char element) {
@@ -88,7 +91,7 @@ void DrawElement(double i, double j, char element) {
 
 void update() {
 	bw = !bw;
-	if (direction == 'P')
+	if (pause)
 		return;
 	//Generate Fruit...
 	if (rand() / (double)RAND_MAX < PGenerateFruit) {
@@ -102,21 +105,26 @@ void update() {
 		else if (board[x][y] != 'S' && board[x][y] != 's')
 			board[x][y] = 'A';
 	}
+	
 	//Generate Walls..
-	for (int i = 20; i < 40; i++) {
+	/*for (int i = 20; i < 40; i++) {
 		board[20][i] = 'W';
-	}
+	}*/
 	//Find out where the head will be...
 	switch (direction) {
-		case 'N': headY++; break;
-		case 'E': headX++; break;
-		case 'S': headY--; break;
-		case 'W': headX--; break;
-		case 'N2': head2Y++; break;
-		case 'E2': head2X++; break;
-		case 'S2': head2Y--; break;
-		case 'W2': head2X--; break;
+	case 'N': headY++; break;
+	case 'E': headX++; break;
+	case 'S': headY--; break;
+	case 'W': headX--; break;
 	}
+
+	switch (direction2) {
+	case 'N': head2Y++; break;
+	case 'E': head2X++; break;
+	case 'S': head2Y--; break;
+	case 'W': head2X--; break;
+	}
+
 	if (headX < 0) headX = gridWidth - 1;
 	if (headY < 0) headY = gridHeight - 1;
 	if (headX >= gridWidth)  headX = 0;
@@ -125,6 +133,7 @@ void update() {
 	if (head2Y < 0) head2Y = gridHeight - 1;
 	if (head2X >= gridWidth)  head2X = 0;
 	if (head2Y >= gridHeight) head2Y = 0;
+	
 	//Move the snake's tail..
 	if (grow == 0) {
 		int tailX = snakeX.back();
@@ -155,7 +164,7 @@ void update() {
 		int tail2Y = snake2Y.back();
 		snake2X.pop_back();
 		snake2Y.pop_back();
-		board2[tail2X][tail2Y] = ' ';
+		board[tail2X][tail2Y] = ' ';
 	}
 	else if (grow2 < 0)
 	{
@@ -164,7 +173,7 @@ void update() {
 			int tail2Y = snake2Y.back();
 			snake2X.pop_back();
 			snake2Y.pop_back();
-			board2[tail2X][tail2Y] = ' ';
+			board[tail2X][tail2Y] = ' ';
 		}
 
 		grow2 += 1;
@@ -172,7 +181,7 @@ void update() {
 	else {
 		grow2--;
 	}
-
+	// Check what snake 1 hits
 	switch (board[headX][headY])
 	{
 		case 'A': grow += 4; break;
@@ -189,8 +198,8 @@ void update() {
 		}
 		case 'W':case 'S': case 's':case 'T': case 't':  gameOver = true; break;
 	}
-
-	switch (board2[head2X][head2Y])
+	// check what snake 2 hits
+	switch (board[head2X][head2Y])
 	{
 	case 'A': grow2 += 4; break;
 	case 'G': grow2 += 8; break;
@@ -212,7 +221,7 @@ void update() {
 	snakeX.push_front(headX);
 	snakeY.push_front(headY);
 	//Move the 2nd snake's head.
-	board2[head2X][head2Y] = bw ? 'T' : 't';
+	board[head2X][head2Y] = bw ? 'T' : 't';
 	snake2X.push_front(head2X);
 	snake2Y.push_front(head2Y);
 }
@@ -231,17 +240,17 @@ void draw() {
 
 void keyboard(int key) {
 	switch (key) {
-		case 'w': if (direction == 'E' || direction == 'W' || direction == 'P') direction = 'N'; break;
-		case 'a': if (direction == 'N' || direction == 'S' || direction == 'P')	direction = 'W'; break;
-		case 's': if (direction == 'E' || direction == 'W' || direction == 'P')	direction = 'S'; break;
-		case 'd': if (direction == 'N' || direction == 'S' || direction == 'P') direction = 'E'; break;
-		case 'i': if (direction2 == 'E2' || direction2 == 'W2' || direction == 'P') direction2 = 'N2'; break;
-		case 'j': if (direction2 == 'N2' || direction2 == 'S2' || direction == 'P')	direction2 = 'W2'; break;
-		case 'k': if (direction2 == 'E2' || direction2 == 'W2' || direction == 'P')	direction2 = 'S2'; break;
-		case 'l': if (direction2 == 'N2' || direction2 == 'S2' || direction == 'P') direction2 = 'E2'; break;
-		case 'n': saveGame();
-		case 'm': loadGame();
-		case 'p': if (direction = 'P');
+		case 'w': if (direction == 'E' || direction == 'W' ) direction = 'N'; break;
+		case 'a': if (direction == 'N' || direction == 'S' )	direction = 'W'; break;
+		case 's': if (direction == 'E' || direction == 'W' )	direction = 'S'; break;
+		case 'd': if (direction == 'N' || direction == 'S' ) direction = 'E'; break;
+		case 'i': if (direction2 == 'E' || direction2 == 'W') direction2 = 'N'; break;
+		case 'j': if (direction2 == 'N' || direction2 == 'S' )	direction2 = 'W'; break;
+		case 'k': if (direction2 == 'E' || direction2 == 'W' )	direction2 = 'S'; break;
+		case 'l': if (direction2 == 'N' || direction2 == 'S' ) direction2 = 'E'; break;
+		case 'n': saveGame(); break;
+		case 'm': loadGame(); break;
+		case 'p': pause = !pause; break;
 		case ' ': 
 			if (gameOver) {
 				gameOver = false;
@@ -252,15 +261,14 @@ void keyboard(int key) {
 				headX = gridWidth / 2.0;
 				headY = gridHeight / 2.0;
 				head2X = gridWidth / 2.0 + 10;
-				head2Y = gridHeight / 2.0;
+				head2Y = gridHeight / 2.0 + 10;
 				for (int i = 0; i < gridWidth; i++) {
 					for (int j = 0; j < gridHeight; j++) {
 						board[i][j] = ' ';
-						board2[i][j] = ' ';
 					}
 				}
-				grow = INITIAL_SIZE;
-				grow2 = INITIAL_SIZE;
+				grow = grow2 =INITIAL_SIZE;
+				direction = direction2 = 'E';
 			}
 			break;
 	}
