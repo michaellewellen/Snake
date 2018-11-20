@@ -10,10 +10,12 @@
 #include <Windows.h>
 
 using namespace std;
+const int FRUITRADIUS = 5;
 const int gridHeight = 50;
 const int gridWidth = 60;
 const int INITIAL_SIZE = 5;
 const double PGenerateFruit = .01;
+int iter = 0;
 
 bool pause = false;
 bool bw = false;
@@ -143,7 +145,7 @@ void update() {
 		board[tailX][tailY] = ' ';
 	}
 	else if (grow < 0)
-	{
+	{	
 		for (int i = 0; i < 2; i++) {
 			int tailX = snakeX.back();
 			int tailY = snakeY.back();
@@ -181,6 +183,14 @@ void update() {
 	else {
 		grow2--;
 	}
+	// Check for fruit in the area of the snake
+	iter++;
+	if (iter%5 == 0) {
+		// move fruit near snake 1
+		moveFruit(headX, headY, direction);
+		// move fruite near snake 2
+		moveFruit(head2X, head2Y, direction2);
+	}
 	// Check what snake 1 hits
 	switch (board[headX][headY])
 	{
@@ -193,7 +203,7 @@ void update() {
 			}
 		    else
 			{
-				grow -= 4; break;
+				grow -= 6; break;
 			}
 		}
 		case 'W':case 'S': case 's':case 'T': case 't':  gameOver = true; break;
@@ -204,7 +214,7 @@ void update() {
 	case 'A': grow2 += 4; break;
 	case 'G': grow2 += 8; break;
 	case 'B': {
-		if (snake2X.size() <= 4)
+		if (snake2X.size() <= 1)
 		{
 			gameOver = true; break;
 		}
@@ -258,8 +268,13 @@ void keyboard(int key) {
 				snakeY.clear();
 				snake2X.clear();
 				snake2Y.clear();
-				headX = gridWidth / 2.0;
-				headY = gridHeight / 2.0;
+				headX = 0;
+				headY = 0;
+				/*head2X = gridWidth;
+				head2Y = gridHeight;*/
+
+				//headX = gridWidth / 2.0;
+				//headY = gridHeight / 2.0;
 				head2X = gridWidth / 2.0 + 10;
 				head2Y = gridHeight / 2.0 + 10;
 				for (int i = 0; i < gridWidth; i++) {
@@ -278,7 +293,8 @@ void saveGame()
 {
 	ofstream snakeFileOut;
 	string fileName;
-	cin >> ("What name would you like to save the file under?", fileName);
+	cout << ("What name would you like to save the file under?");
+	cin >>  fileName;
 	snakeFileOut.open(fileName);
 	for (int i = 0; i < gridWidth; i++) {
 		for (int j = 0; j < gridHeight; j++) {
@@ -294,16 +310,68 @@ void loadGame()
 {
 	ifstream snakeFileIn;
 	string fileName;
-	cin >> ("What filename would you like to load?", fileName);
+	cout << ("What file name would you like to load?");
+	cin >> fileName;
 	snakeFileIn.open(fileName);
+	snakeFileIn >> std::noskipws;
 	for (int i = 0; i < gridWidth; i++) {
 		for (int j = 0; j < gridHeight; j++) {
 			snakeFileIn >> board[i][j];
+			
 		}
 	}
+	
 		
 }
 
+void moveFruit(int X, int Y, char dir)
+{
+	
+	char temp;
+	for (int i = (X - FRUITRADIUS); i < (X + FRUITRADIUS); i++)
+	{
+		for (int j = (Y - FRUITRADIUS); j < (Y + FRUITRADIUS); j++)
+		{
+			if (board[i][j] == 'A' || board[i][j] == 'G')
+			{
+				temp = board[i][j];
+				board[i][j] = ' ';
+				
+
+				switch (dir) {
+				case 'N': {
+					if ((j + 1) > gridHeight)
+						board[i][0] = temp;
+					else
+						board[i - 1][j] = temp;
+					break;
+				}
+				case 'E': {
+					if ((i + 1) > gridWidth)
+						board[0][j] = temp;
+					else
+						board[i][j - 1] = temp;
+					break;
+				}
+				case 'W': {
+					if ((i - 1) < 0)
+						board[gridWidth][j] = temp;
+					else
+						board[i - 1][j] = temp; 
+					break;
+				}
+				case 'S': {
+					if ((j - 1) <0)
+						board[i][gridHeight] = temp;
+					else
+						board[i][j - 1] = temp; 
+					break;
+				}
+				}
+			}
+		}
+	}
+}
 
 
 int main(int argc, char** argv) {

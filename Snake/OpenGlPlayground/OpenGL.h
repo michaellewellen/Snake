@@ -20,6 +20,7 @@ void DrawCircle(float centerX, float centerY, float radius, int segments = 24);
 
 void loadGame();
 void saveGame();
+void moveFruit(int snakeX, int snakeY, char direction);
 void SetColor(int r, int g, int b, int a = 255);
 void Reset();
 void Rotate(float deg);
